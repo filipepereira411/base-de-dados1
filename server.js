@@ -1,16 +1,18 @@
-require('dotenv').config();
-const express = require('express');
 const path = require('path');
+// Garante que o .env é lido da pasta real onde o .exe está guardado, e não da pasta virtual
+require('dotenv').config({ path: path.join(process.cwd(), '.env') });
+
+const express = require('express');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = 3000;
 
-// Inicializa o cliente do Supabase usando as tuas chaves do .env
+// Inicializa o cliente do Supabase
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
-// Configurações para ler JSON e servir os ficheiros da pasta public
 app.use(express.json());
+// Serve a pasta public a partir da raiz virtual do pacote
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 1. ROTA PARA LISTAR PRODUTOS (GET)
@@ -39,7 +41,6 @@ app.get('/api/vendas', async (req, res) => {
 app.post('/api/vendas', async (req, res) => {
   try {
     const { total } = req.body;
-    
     const { data, error } = await supabase
       .from('vendas')
       .insert([{ total: parseFloat(total) }])
@@ -58,3 +59,4 @@ app.listen(PORT, () => {
   console.log(` Servidor a correr em: http://localhost:${PORT}`);
   console.log(`==================================================\n`);
 });
+  
